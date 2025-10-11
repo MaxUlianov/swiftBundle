@@ -57,15 +57,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        for entry in clipboardEntries {
+        for entry in clipboardEntries.reversed() {
             let displayTitle = truncatedTitle(entry)
             let item = NSMenuItem(title: displayTitle, action: #selector(menuClicked(_:)), keyEquivalent: "")
+            item.representedObject = entry
             menu.addItem(item)
-
-            // Add separator after each item except the last
-            if entry != clipboardEntries.last {
-                menu.addItem(NSMenuItem.separator())
-            }
+            
+            menu.addItem(NSMenuItem.separator())
         }
 
         statusItem.menu = menu
@@ -73,10 +71,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 
     @objc func menuClicked(_ sender: NSMenuItem) {
-        // Original debug - print to terminal
-        // print("Clicked entry:\n\(sender.title)\n\-----")
-        let contentToPaste = sender.title
-        pasteClipboardContent(contentToPaste)
+        if let fullContent = sender.representedObject as? String {
+            if let index = clipboardEntries.firstIndex(of: fullContent) {
+                clipboardEntries.remove(at: index)
+            }
+            // updateMenu()
+            pasteClipboardContent(fullContent)
+        }
     }
 }
 
